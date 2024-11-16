@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  profiles_db:
+    image: mysql:8.0
+    container_name: profiles_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3311:3306"
+    volumes:
+      - profiles_db_data:/var/lib/mysql
+    networks:
+      - profiles_network
+
+  profiles_web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: profiles_service
+    command: >
+      sh -c "python manage.py makemigrations && \
+      python manage.py migrate && \
+      python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8002:8000"
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      - profiles_db
+    networks:
+      - profiles_network
+
+volumes:
+  profiles_db_data:
+    driver: local
+
+networks:
+  profiles_network:
+    driver: bridge
