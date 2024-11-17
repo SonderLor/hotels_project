@@ -26,6 +26,8 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'corsheaders',
+
+    'profiles.apps.ProfilesConfig',
 ]
 
 MIDDLEWARE = [
@@ -98,6 +100,31 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+
+    },
+}
+
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = os.getenv('TIME_ZONE', 'UTC')
@@ -106,6 +133,12 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+
+STATIC_ROOT = BASE_DIR / 'static'
+
+MEDIA_URL = '/media/'
+
+MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
