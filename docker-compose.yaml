@@ -125,6 +125,21 @@ services:
       - profiles_db
     networks:
       - app_network
+  
+  frontend:
+    build:
+      context: ./frontend_service/
+      dockerfile: Dockerfile
+    container_name: frontend_service
+    command: >
+      sh -c "python manage.py runserver --noreload 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    networks:
+      - app_network
 
 volumes:
   auth_db_data:
