@@ -1,0 +1,137 @@
+version: '3.8'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - app_network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - app_network
+
+  auth_db:
+    image: mysql:8.0
+    container_name: auth_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_AUTH_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_AUTH_NAME}
+      MYSQL_USER: ${DB_AUTH_USER}
+      MYSQL_PASSWORD: ${DB_AUTH_PASSWORD}
+    ports:
+      - "3310:3306"
+    volumes:
+      - auth_db_data:/var/lib/mysql
+    networks:
+      - app_network
+
+  auth_web:
+    build:
+      context: ./auth_service/
+      dockerfile: Dockerfile
+    container_name: auth_service
+    command: >
+      sh -c "python manage.py makemigrations && \
+      python manage.py migrate && \
+      python manage.py runserver --noreload 0.0.0.0:8000"
+    ports:
+      - "8001:8000"
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      DB_HOST: ${DB_AUTH_HOST}
+      DB_PORT: ${DB_AUTH_PORT}
+      DB_NAME: ${DB_AUTH_NAME}
+      DB_USER: ${DB_AUTH_USER}
+      DB_PASSWORD: ${DB_AUTH_PASSWORD}
+    depends_on:
+      - auth_db
+    networks:
+      - app_network
+
+  profiles_db:
+    image: mysql:8.0
+    container_name: profiles_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PROFILES_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_PROFILES_NAME}
+      MYSQL_USER: ${DB_PROFILES_USER}
+      MYSQL_PASSWORD: ${DB_PROFILES_PASSWORD}
+    ports:
+      - "3311:3306"
+    volumes:
+      - profiles_db_data:/var/lib/mysql
+    networks:
+      - app_network
+
+  profiles_web:
+    build:
+      context: ./profiles_service/
+      dockerfile: Dockerfile
+    container_name: profiles_service
+    command: >
+      sh -c "python manage.py makemigrations && \
+      python manage.py migrate && \
+      python manage.py runserver --noreload 0.0.0.0:8000"
+    ports:
+      - "8002:8000"
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      DB_HOST: ${DB_PROFILES_HOST}
+      DB_PORT: ${DB_PROFILES_PORT}
+      DB_NAME: ${DB_PROFILES_NAME}
+      DB_USER: ${DB_PROFILES_USER}
+      DB_PASSWORD: ${DB_PROFILES_PASSWORD}
+    depends_on:
+      - profiles_db
+    networks:
+      - app_network
+
+  profiles_web_kafka_listener:
+    build:
+      context: ./profiles_service/
+      dockerfile: Dockerfile
+    container_name: profiles_service_kafka_listener
+    command: >
+      sh -c "python start_kafka_consumer.py"
+    ports:
+      - "8022:8000"
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      DB_HOST: ${DB_PROFILES_HOST}
+      DB_PORT: ${DB_PROFILES_PORT}
+      DB_NAME: ${DB_PROFILES_NAME}
+      DB_USER: ${DB_PROFILES_USER}
+      DB_PASSWORD: ${DB_PROFILES_PASSWORD}
+    depends_on:
+      - profiles_db
+    networks:
+      - app_network
+
+volumes:
+  auth_db_data:
+    driver: local
+  profiles_db_data:
+    driver: local
+
+networks:
+  app_network:
+    driver: bridge
