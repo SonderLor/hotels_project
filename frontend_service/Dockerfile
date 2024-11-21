@@ -1,16 +1,13 @@
-FROM python:3.12
-
-RUN apt-get update && apt-get install -y gcc python3-dev musl-dev libpq-dev && \
-    apt-get clean
+FROM node:18-alpine
 
 WORKDIR /app
 
-COPY requirements.txt requirements.txt
-
-RUN pip install -r requirements.txt
+COPY package*.json ./
+RUN npm install
 
 COPY . .
 
-EXPOSE 8000
+RUN npm run build
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+EXPOSE 3000
+CMD ["npm", "start"]
