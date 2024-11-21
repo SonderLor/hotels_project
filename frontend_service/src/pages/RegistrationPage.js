@@ -17,11 +17,16 @@ const RegistrationPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log('[RegistrationPage] Form submitted with data:', formData);
+
         if (formData.password !== formData.passwordRepeat) {
-            setError('Пароли не совпадают.');
+            console.warn('[RegistrationPage] Passwords do not match');
+            setError('Passwords do not match.');
             return;
         }
+
         try {
+            console.log('[RegistrationPage] Sending registration request...');
             await register({
                 username: formData.username,
                 password: formData.password,
@@ -29,23 +34,27 @@ const RegistrationPage = () => {
                 first_name: formData.first_name,
                 last_name: formData.last_name,
             });
+            console.log('[RegistrationPage] Registration successful');
             navigate('/login');
         } catch (err) {
-            setError('Ошибка регистрации.');
+            console.error('[RegistrationPage] Registration error:', err);
+            setError('Registration failed.');
         }
     };
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        console.log(`[RegistrationPage] Updating field ${name}:`, value);
+        setFormData({ ...formData, [name]: value });
     };
 
     return (
         <div className="container mt-5">
-            <h2>Регистрация</h2>
+            <h2>Registration</h2>
             {error && <div className="alert alert-danger">{error}</div>}
             <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                    <label className="form-label">Логин</label>
+                    <label className="form-label">Username</label>
                     <input
                         type="text"
                         name="username"
@@ -56,7 +65,7 @@ const RegistrationPage = () => {
                     />
                 </div>
                 <div className="mb-3">
-                    <label className="form-label">Имя</label>
+                    <label className="form-label">First Name</label>
                     <input
                         type="text"
                         name="first_name"
@@ -66,7 +75,7 @@ const RegistrationPage = () => {
                     />
                 </div>
                 <div className="mb-3">
-                    <label className="form-label">Фамилия</label>
+                    <label className="form-label">Last Name</label>
                     <input
                         type="text"
                         name="last_name"
@@ -86,7 +95,7 @@ const RegistrationPage = () => {
                     />
                 </div>
                 <div className="mb-3">
-                    <label className="form-label">Пароль</label>
+                    <label className="form-label">Password</label>
                     <input
                         type="password"
                         name="password"
@@ -97,7 +106,7 @@ const RegistrationPage = () => {
                     />
                 </div>
                 <div className="mb-3">
-                    <label className="form-label">Повторить пароль</label>
+                    <label className="form-label">Repeat Password</label>
                     <input
                         type="password"
                         name="passwordRepeat"
@@ -107,7 +116,9 @@ const RegistrationPage = () => {
                         required
                     />
                 </div>
-                <button type="submit" className="btn btn-success">Зарегистрироваться</button>
+                <button type="submit" className="btn btn-success">
+                    Register
+                </button>
             </form>
         </div>
     );

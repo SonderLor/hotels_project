@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Spinner, Button, Form } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 const UpdateProfilePage = () => {
     const [profile, setProfile] = useState(null);
@@ -11,9 +12,11 @@ const UpdateProfilePage = () => {
         birth_date: '',
         location: '',
     });
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchProfile = async () => {
+            console.log('[UpdateProfilePage] Fetching current profile...');
             try {
                 const response = await axios.get('http://localhost:8002/profiles/current', {
                     headers: {
@@ -21,6 +24,7 @@ const UpdateProfilePage = () => {
                     },
                 });
                 const fetchedProfile = response.data;
+                console.log('[UpdateProfilePage] Profile fetched:', fetchedProfile);
                 setProfile(fetchedProfile);
                 setFormData({
                     bio: fetchedProfile.bio || '',
@@ -28,6 +32,7 @@ const UpdateProfilePage = () => {
                     location: fetchedProfile.location || '',
                 });
             } catch (err) {
+                console.error('[UpdateProfilePage] Error fetching profile:', err);
                 setError('Failed to load profile');
             } finally {
                 setLoading(false);
@@ -39,6 +44,7 @@ const UpdateProfilePage = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        console.log(`[UpdateProfilePage] Updating field ${name}:`, value);
         setFormData((prevState) => ({
             ...prevState,
             [name]: value,
@@ -47,16 +53,20 @@ const UpdateProfilePage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log('[UpdateProfilePage] Submitting updated profile data:', formData);
+
         try {
-            await axios.put(`/profiles/${profile.id}/`, formData, {
+            await axios.put(`http://localhost:8002/profiles/${profile.id}/`, formData, {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
                     'Content-Type': 'application/json',
                 },
             });
-            alert('Profile updated successfully');
+            console.log('[UpdateProfilePage] Profile updated successfully');
+            navigate('/profile', { state: { successMessage: 'Profile updated successfully!' } });
         } catch (err) {
-            alert('Failed to update profile');
+            console.error('[UpdateProfilePage] Error updating profile:', err);
+            navigate('/profile', { state: { errorMessage: 'Failed to update profile.' } });
         }
     };
 
