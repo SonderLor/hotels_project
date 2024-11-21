@@ -1,23 +1,27 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const LogoutPage = () => {
     const navigate = useNavigate();
+    const { logout } = useAuth();
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
+        console.log('[LogoutPage] Logging out...');
+        logout();
+        console.log('[LogoutPage] Tokens removed');
         navigate('/');
     };
 
     return (
         <div className="container text-center mt-5">
-            <h2>Вы действительно хотите выйти?</h2>
+            <h2>Are you sure you want to log out?</h2>
             <div className="mt-3">
                 <button className="btn btn-danger me-2" onClick={handleLogout}>
-                    Да, выйти
+                    Yes, log out
                 </button>
                 <button className="btn btn-secondary" onClick={() => navigate(-1)}>
-                    Отмена
+                    Cancel
                 </button>
             </div>
         </div>
