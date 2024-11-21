@@ -28,7 +28,7 @@ services:
 
   auth_db:
     image: mysql:8.0
-    container_name: auth_db
+    container_name: authDB
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_AUTH_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_AUTH_NAME}
@@ -45,7 +45,7 @@ services:
     build:
       context: ./auth_service/
       dockerfile: Dockerfile
-    container_name: auth_service
+    container_name: authService
     command: >
       sh -c "python manage.py makemigrations && \
       python manage.py migrate && \
@@ -67,7 +67,7 @@ services:
 
   profiles_db:
     image: mysql:8.0
-    container_name: profiles_db
+    container_name: profilesDB
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PROFILES_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_PROFILES_NAME}
@@ -84,7 +84,7 @@ services:
     build:
       context: ./profiles_service/
       dockerfile: Dockerfile
-    container_name: profiles_service
+    container_name: profilesService
     command: >
       sh -c "python manage.py makemigrations && \
       python manage.py migrate && \
@@ -108,7 +108,7 @@ services:
     build:
       context: ./profiles_service/
       dockerfile: Dockerfile
-    container_name: profiles_service_kafka_listener
+    container_name: profilesServiceKafkaListener
     command: >
       sh -c "python start_kafka_consumer.py"
     ports:
@@ -125,19 +125,22 @@ services:
       - profiles_db
     networks:
       - app_network
-  
-  frontend:
-    build:
-      context: ./frontend_service/
-      dockerfile: Dockerfile
-    container_name: frontend_service
-    command: >
-      sh -c "python manage.py runserver --noreload 0.0.0.0:8000"
+
+  redis:
+    image: redis:latest
+    container_name: redisCache
     ports:
-      - "8000:8000"
-    environment:
-      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      - "6379:6379"
+    networks:
+      - app_network
+
+  react_frontend:
+    build:
+      context: ./frontend_service
+      dockerfile: Dockerfile
+    container_name: reactFrontend
+    ports:
+      - "3000:3000"
     networks:
       - app_network
 
@@ -145,6 +148,8 @@ volumes:
   auth_db_data:
     driver: local
   profiles_db_data:
+    driver: local
+  frontend_db_data:
     driver: local
 
 networks:
