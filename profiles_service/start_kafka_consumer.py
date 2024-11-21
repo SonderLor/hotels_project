@@ -9,6 +9,8 @@ django.setup()
 logger = logging.getLogger(__name__)
 
 KAFKA_BROKER = os.getenv("KAFKA_BROKER")
+if not KAFKA_BROKER:
+    logger.error("KAFKA_BROKER environment variable is not set.")
 TOPIC = "user-events"
 GROUP_ID = "profiles_service_group"
 
@@ -16,37 +18,56 @@ from profiles.models import Profile
 
 
 def create_profile(user_id, username):
-    Profile.objects.create(user_id=user_id, username=username)
+    try:
+        Profile.objects.create(user_id=user_id, username=username)
+        logger.info("Profile created for user ID: %s, username: %s", user_id, username)
+    except Exception as e:
+        logger.exception("Failed to create profile for user ID: %s: %s", user_id, e)
 
 
 def delete_profile(user_id):
-    Profile.objects.filter(user_id=user_id).delete()
+    try:
+        Profile.objects.filter(user_id=user_id).delete()
+        logger.info("Profile deleted for user ID: %s", user_id)
+    except Exception as e:
+        logger.exception("Failed to delete profile for user ID: %s: %s", user_id, e)
 
 
 if __name__ == "__main__":
-    consumer = Consumer({
-        'bootstrap.servers': KAFKA_BROKER,
-        'group.id': GROUP_ID,
-        'auto.offset.reset': 'earliest'
-    })
+    try:
+        consumer = Consumer({
+            'bootstrap.servers': KAFKA_BROKER,
+            'group.id': GROUP_ID,
+            'auto.offset.reset': 'earliest'
+        })
+        consumer.subscribe([TOPIC])
+        logger.info("Kafka consumer initialized and subscribed to topic: %s", TOPIC)
 
-    consumer.subscribe([TOPIC])
-    logger.info("Поток consume_events запущен")
-    while True:
-        try:
-            msg = consumer.poll(timeout=1.0)
-            if msg is None:
-                continue
-            if msg.error():
-                if msg.error().code() == KafkaException._PARTITION_EOF:
+        while True:
+            try:
+                msg = consumer.poll(timeout=1.0)
+                if msg is None:
                     continue
+                if msg.error():
+                    if msg.error().code() == KafkaException._PARTITION_EOF:
+                        continue
+                    else:
+                        logger.error("Kafka error: %s", msg.error())
+                        break
+
+                event = eval(msg.value().decode('utf-8'))
+                logger.info("Event received from Kafka: %s", event)
+
+                if event.get("event_type") == "UserCreated":
+                    create_profile(event["user_id"], event["username"])
+                elif event.get("event_type") == "UserDeleted":
+                    delete_profile(event["user_id"])
                 else:
-                    logger.error(f"Kafka error: {msg.error()}")
-                    break
-            event = eval(msg.value().decode('utf-8'))
-            if event.get("event_type") == "UserCreated":
-                create_profile(event["user_id"], event["username"])
-            if event.get("event_type") == "UserDeleted":
-                delete_profile(event["user_id"])
-        except Exception as e:
-            logger.exception("Error in consume events: {}".format(e))
+                    logger.warning("Unhandled event type: %s", event.get("event_type"))
+            except Exception as e:
+                logger.exception("Error while consuming Kafka event: %s", e)
+    except Exception as e:
+        logger.exception("Failed to initialize Kafka consumer: %s", e)
+    finally:
+        consumer.close()
+        logger.info("Kafka consumer closed.")
