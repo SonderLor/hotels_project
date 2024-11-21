@@ -39,6 +39,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'profiles.middlewares.CurrentUserMiddleware',
 ]
 
 ROOT_URLCONF = 'profiles_service.urls'
@@ -71,13 +72,13 @@ CORS_ALLOW_HEADERS = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': [],
+    'DEFAULT_PERMISSION_CLASSES': [],
 }
+
+AUTHENTICATION_BACKENDS = [
+    'profiles.authentication.JWTAuthentication',
+]
 
 WSGI_APPLICATION = 'profiles_service.wsgi.application'
 
@@ -129,6 +130,16 @@ LOGGING = {
     },
     'loggers': {
         'profiles.views': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'profiles.middlewares': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'profiles.authentication': {
             'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': False,
