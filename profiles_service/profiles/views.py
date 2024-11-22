@@ -1,6 +1,7 @@
-from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
+
 from .models import Profile
 from .permissions import TokenAuthenticated
 from .serializers import ProfileSerializer
@@ -25,7 +26,7 @@ class CurrentUserProfileView(APIView):
             return Response({"error": "Profile not found"}, status=404)
 
 
-class ProfileListCreateView(generics.ListCreateAPIView):
+class ProfileViewSet(ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     permission_classes = [TokenAuthenticated]
@@ -39,12 +40,6 @@ class ProfileListCreateView(generics.ListCreateAPIView):
         response = super().create(request, *args, **kwargs)
         logger.info("Profile created successfully: %s", response.data)
         return response
-
-
-class ProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
-    permission_classes = [TokenAuthenticated]
 
     def retrieve(self, request, *args, **kwargs):
         logger.info("Retrieving profile ID: %s", kwargs['pk'])
