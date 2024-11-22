@@ -75,7 +75,7 @@ export const login = async (username, password) => {
 
 export const register = (userData) => {
     log('Attempting registration', userData);
-    return API.post('register/', userData);
+    return API.post('api/users/', userData);
 };
 
 export default API;
