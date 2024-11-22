@@ -3,6 +3,7 @@ from django.db import models
 
 class Profile(models.Model):
     user_id = models.BigIntegerField(unique=True)
+    email = models.EmailField(unique=True)
     username = models.CharField(max_length=100)
     bio = models.TextField(blank=True, null=True)
     birth_date = models.DateField(blank=True, null=True)
