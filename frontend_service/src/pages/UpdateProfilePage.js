@@ -18,7 +18,7 @@ const UpdateProfilePage = () => {
         const fetchProfile = async () => {
             console.log('[UpdateProfilePage] Fetching current profile...');
             try {
-                const response = await axios.get('http://localhost:8002/profiles/current', {
+                const response = await axios.get('http://localhost:8002/profiles/current/', {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('access_token')}`,
                     },
@@ -56,7 +56,7 @@ const UpdateProfilePage = () => {
         console.log('[UpdateProfilePage] Submitting updated profile data:', formData);
 
         try {
-            await axios.put(`http://localhost:8002/profiles/${profile.id}/`, formData, {
+            await axios.put(`http://localhost:8002/profiles/api/${profile.id}/`, formData, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
                     'Content-Type': 'application/json',

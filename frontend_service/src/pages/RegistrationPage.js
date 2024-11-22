@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { register } from '../api';
-import { ClipLoader } from 'react-spinners';
 
 const RegistrationPage = () => {
     const [formData, setFormData] = useState({
+        email: '',
         username: '',
         password: '',
         passwordRepeat: '',
-        email: '',
-        first_name: '',
-        last_name: '',
     });
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -28,11 +25,9 @@ const RegistrationPage = () => {
         try {
             console.log('[RegistrationPage] Sending registration request...');
             await register({
+                email: formData.email,
                 username: formData.username,
                 password: formData.password,
-                email: formData.email,
-                first_name: formData.first_name,
-                last_name: formData.last_name,
             });
             console.log('[RegistrationPage] Registration successful');
             navigate('/login');
@@ -54,6 +49,16 @@ const RegistrationPage = () => {
             {error && <div className="alert alert-danger">{error}</div>}
             <form onSubmit={handleSubmit}>
                 <div className="mb-3">
+                    <label className="form-label">Email</label>
+                    <input
+                        type="email"
+                        name="email"
+                        className="form-control"
+                        value={formData.email}
+                        onChange={handleChange}
+                    />
+                </div>
+                <div className="mb-3">
                     <label className="form-label">Username</label>
                     <input
                         type="text"
@@ -62,36 +67,6 @@ const RegistrationPage = () => {
                         value={formData.username}
                         onChange={handleChange}
                         required
-                    />
-                </div>
-                <div className="mb-3">
-                    <label className="form-label">First Name</label>
-                    <input
-                        type="text"
-                        name="first_name"
-                        className="form-control"
-                        value={formData.first_name}
-                        onChange={handleChange}
-                    />
-                </div>
-                <div className="mb-3">
-                    <label className="form-label">Last Name</label>
-                    <input
-                        type="text"
-                        name="last_name"
-                        className="form-control"
-                        value={formData.last_name}
-                        onChange={handleChange}
-                    />
-                </div>
-                <div className="mb-3">
-                    <label className="form-label">Email</label>
-                    <input
-                        type="email"
-                        name="email"
-                        className="form-control"
-                        value={formData.email}
-                        onChange={handleChange}
                     />
                 </div>
                 <div className="mb-3">
