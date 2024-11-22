@@ -17,10 +17,10 @@ GROUP_ID = "profiles_service_group"
 from profiles.models import Profile
 
 
-def create_profile(user_id, username):
+def create_profile(user_id, email, username):
     try:
-        Profile.objects.create(user_id=user_id, username=username)
-        logger.info("Profile created for user ID: %s, username: %s", user_id, username)
+        Profile.objects.create(user_id=user_id, email=email, username=username)
+        logger.info("Profile created for user ID: %s, email: %s, username: %s", user_id, email, username)
     except Exception as e:
         logger.exception("Failed to create profile for user ID: %s: %s", user_id, e)
 
@@ -59,7 +59,7 @@ if __name__ == "__main__":
                 logger.info("Event received from Kafka: %s", event)
 
                 if event.get("event_type") == "UserCreated":
-                    create_profile(event["user_id"], event["username"])
+                    create_profile(event["user_id"], event["email"], event["username"])
                 elif event.get("event_type") == "UserDeleted":
                     delete_profile(event["user_id"])
                 else:
