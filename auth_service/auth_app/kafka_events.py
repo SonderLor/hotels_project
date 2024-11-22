@@ -16,11 +16,12 @@ except Exception as e:
     logger.exception("Failed to initialize Kafka producer: %s", e)
     raise
 
-def send_user_created_event(user_id, username):
+def send_user_created_event(user_id, username, email):
     event = {
         "event_type": "UserCreated",
         "user_id": str(user_id),
         "username": username,
+        "email": email,
     }
     try:
         producer.produce(TOPIC, value=str(event))
