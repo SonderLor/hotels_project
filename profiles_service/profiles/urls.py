@@ -1,10 +1,13 @@
 from django.conf.urls.static import static
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from profiles_service import settings
-from .views import ProfileListCreateView, ProfileDetailView, CurrentUserProfileView
+from .views import CurrentUserProfileView, ProfileViewSet
+
+router = DefaultRouter()
+router.register(r'', ProfileViewSet, basename='profile')
 
 urlpatterns = [
-    path('', ProfileListCreateView.as_view(), name='profile_list_create'),
-    path('<int:pk>/', ProfileDetailView.as_view(), name='profile_detail'),
+    path('api/', include(router.urls)),
     path('current/', CurrentUserProfileView.as_view(), name='current_user_profile'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
