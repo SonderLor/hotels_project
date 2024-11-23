@@ -54,12 +54,17 @@ const UpdateProfilePage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log('[UpdateProfilePage] Submitting updated profile data:', formData);
-
+    
+        const data = new FormData();
+        for (const key in formData) {
+            data.append(key, formData[key]);
+        }
+    
         try {
-            await axios.put(`http://localhost:8002/profiles/api/${profile.id}/`, formData, {
+            await axios.put(`http://localhost:8002/profiles/api/${profile.id}/`, data, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'multipart/form-data',
                 },
             });
             console.log('[UpdateProfilePage] Profile updated successfully');
@@ -69,6 +74,7 @@ const UpdateProfilePage = () => {
             navigate('/profile', { state: { errorMessage: 'Failed to update profile.' } });
         }
     };
+    
 
     if (loading) return <Spinner animation="border" variant="primary" />;
     if (error) return <p className="text-danger">{error}</p>;
@@ -102,6 +108,14 @@ const UpdateProfilePage = () => {
                         name="location"
                         value={formData.location}
                         onChange={handleChange}
+                    />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Label>Profile Picture</Form.Label>
+                    <Form.Control
+                        type="file"
+                        name="profile_picture"
+                        onChange={(e) => setFormData({ ...formData, profile_picture: e.target.files[0] })}
                     />
                 </Form.Group>
                 <Button variant="primary" type="submit">

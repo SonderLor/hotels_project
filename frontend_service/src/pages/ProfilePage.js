@@ -60,7 +60,7 @@ const ProfilePage = () => {
                         </p>
                         {profile.profile_picture && (
                             <img
-                                src={profile.profile_picture}
+                                src={`http://localhost:8002${profile.profile_picture}`}
                                 alt="Profile"
                                 className="img-fluid rounded-circle"
                                 style={{ maxWidth: '150px' }}
