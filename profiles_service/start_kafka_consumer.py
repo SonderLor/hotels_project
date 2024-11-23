@@ -49,11 +49,8 @@ if __name__ == "__main__":
                 if msg is None:
                     continue
                 if msg.error():
-                    if msg.error().code() == KafkaException._PARTITION_EOF:
-                        continue
-                    else:
-                        logger.error("Kafka error: %s", msg.error())
-                        break
+                    logger.error("Kafka error: %s", msg.error())
+                    break
 
                 event = eval(msg.value().decode('utf-8'))
                 logger.info("Event received from Kafka: %s", event)
