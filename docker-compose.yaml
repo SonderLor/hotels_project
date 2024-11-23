@@ -52,14 +52,6 @@ services:
       python manage.py runserver --noreload 0.0.0.0:8000"
     ports:
       - "8001:8000"
-    environment:
-      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-      DB_HOST: ${DB_AUTH_HOST}
-      DB_PORT: ${DB_AUTH_PORT}
-      DB_NAME: ${DB_AUTH_NAME}
-      DB_USER: ${DB_AUTH_USER}
-      DB_PASSWORD: ${DB_AUTH_PASSWORD}
     depends_on:
       - auth_db
     networks:
@@ -91,16 +83,8 @@ services:
       python manage.py runserver --noreload 0.0.0.0:8000"
     ports:
       - "8002:8000"
-    environment:
-      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-      DB_HOST: ${DB_PROFILES_HOST}
-      DB_PORT: ${DB_PROFILES_PORT}
-      DB_NAME: ${DB_PROFILES_NAME}
-      DB_USER: ${DB_PROFILES_USER}
-      DB_PASSWORD: ${DB_PROFILES_PASSWORD}
     volumes:
-      - media_volume:/app/media
+      - profiles_media_volume:/app/media
     depends_on:
       - profiles_db
     networks:
@@ -115,16 +99,41 @@ services:
       sh -c "python start_kafka_consumer.py"
     ports:
       - "8022:8000"
-    environment:
-      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-      DB_HOST: ${DB_PROFILES_HOST}
-      DB_PORT: ${DB_PROFILES_PORT}
-      DB_NAME: ${DB_PROFILES_NAME}
-      DB_USER: ${DB_PROFILES_USER}
-      DB_PASSWORD: ${DB_PROFILES_PASSWORD}
     depends_on:
       - profiles_db
+    networks:
+      - app_network
+
+  hotels_db:
+    image: mysql:8.0
+    container_name: hotelsDB
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_HOTELS_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_HOTELS_NAME}
+      MYSQL_USER: ${DB_HOTELS_USER}
+      MYSQL_PASSWORD: ${DB_HOTELS_PASSWORD}
+    ports:
+      - "3312:3306"
+    volumes:
+      - hotels_db_data:/var/lib/mysql
+    networks:
+      - app_network
+
+  hotels_web:
+    build:
+      context: ./hotels_service/
+      dockerfile: Dockerfile
+    container_name: hotelsService
+    command: >
+      sh -c "python manage.py makemigrations && \
+      python manage.py migrate && \
+      python manage.py runserver --noreload 0.0.0.0:8000"
+    ports:
+      - "8003:8000"
+    volumes:
+      - hotels_media_volume:/app/media
+    depends_on:
+      - hotels_db
     networks:
       - app_network
 
@@ -151,9 +160,10 @@ volumes:
     driver: local
   profiles_db_data:
     driver: local
-  frontend_db_data:
+  hotels_db_data:
     driver: local
-  media_volume:
+  profiles_media_volume:
+  hotels_media_volume:
 
 networks:
   app_network:
