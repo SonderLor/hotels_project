@@ -99,6 +99,8 @@ services:
       DB_NAME: ${DB_PROFILES_NAME}
       DB_USER: ${DB_PROFILES_USER}
       DB_PASSWORD: ${DB_PROFILES_PASSWORD}
+    volumes:
+      - media_volume:/app/media
     depends_on:
       - profiles_db
     networks:
@@ -151,6 +153,7 @@ volumes:
     driver: local
   frontend_db_data:
     driver: local
+  media_volume:
 
 networks:
   app_network:
