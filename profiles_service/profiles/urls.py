@@ -10,4 +10,4 @@ router.register(r'', ProfileViewSet, basename='profile')
 urlpatterns = [
     path('api/', include(router.urls)),
     path('current/', CurrentUserProfileView.as_view(), name='current_user_profile'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
