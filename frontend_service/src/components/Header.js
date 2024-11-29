@@ -1,9 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Header = () => {
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, user } = useAuth();
 
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -25,34 +25,70 @@ const Header = () => {
                 <div className="collapse navbar-collapse" id="navbarNav">
                     <ul className="navbar-nav ms-auto">
                         <li className="nav-item">
-                            <Link className="nav-link" to="/about">
+                            <NavLink className="nav-link" to="/about" activeClassName="active">
                                 About
-                            </Link>
+                            </NavLink>
                         </li>
                         {isLoggedIn ? (
                             <>
+                                {user?.role === 'staff' && (
+                                    <li className="nav-item">
+                                        <NavLink
+                                            className="nav-link"
+                                            to="/hotels/user"
+                                            activeClassName="active"
+                                        >
+                                            My Hotels
+                                        </NavLink>
+                                    </li>
+                                )}
                                 <li className="nav-item">
-                                    <Link className="nav-link" to="/profile">
-                                        Profile
-                                    </Link>
+                                    <NavLink
+                                        className="nav-link"
+                                        to="/hotels"
+                                        activeClassName="active"
+                                    >
+                                        Hotels
+                                    </NavLink>
                                 </li>
                                 <li className="nav-item">
-                                    <Link className="nav-link" to="/logout">
-                                        Logout
-                                    </Link>
+                                    <div class="btn-group" role="group" aria-label="Basic example">
+                                        <NavLink
+                                            className="btn btn-secondary"
+                                            to="/profile"
+                                            activeClassName="active"
+                                        >
+                                            {user?.username} ({user?.role})
+                                        </NavLink>
+                                        <NavLink
+                                            className="btn btn-secondary"
+                                            to="/logout"
+                                            activeClassName="active"
+                                        >
+                                            Logout
+                                        </NavLink>
+                                    </div>
                                 </li>
                             </>
                         ) : (
                             <>
                                 <li className="nav-item">
-                                    <Link className="nav-link" to="/login">
-                                        Login
-                                    </Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="/registration">
-                                        Register
-                                    </Link>
+                                    <div class="btn-group" role="group" aria-label="Basic example">
+                                        <NavLink
+                                            className="btn btn-secondary"
+                                            to="/login"
+                                            activeClassName="active"
+                                        >
+                                            Login
+                                        </NavLink>
+                                        <NavLink
+                                            className="btn btn-secondary"
+                                            to="/registration"
+                                            activeClassName="active"
+                                        >
+                                            Register
+                                        </NavLink>
+                                    </div>
                                 </li>
                             </>
                         )}
