@@ -18,7 +18,7 @@ class CurrentUserProfileView(APIView):
         try:
             user_id = request.user_id
             profile = Profile.objects.get(user_id=user_id)
-            serializer = ProfileSerializer(profile)
+            serializer = ProfileSerializer(profile, context={'request': request})
             logger.info("Profile retrieved successfully for user ID: %s", user_id)
             return Response(serializer.data)
         except Profile.DoesNotExist:
