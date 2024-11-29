@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Spinner, Button, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { ProfilesAPI } from '../api';
+import { useAuth } from '../context/AuthContext';
 
 const UpdateProfilePage = () => {
     const [profile, setProfile] = useState(null);
@@ -13,14 +14,15 @@ const UpdateProfilePage = () => {
         location: '',
     });
     const navigate = useNavigate();
+    const { accessToken } = useAuth();
 
     useEffect(() => {
         const fetchProfile = async () => {
             console.log('[UpdateProfilePage] Fetching current profile...');
             try {
-                const response = await axios.get('http://localhost:8002/profiles/current/', {
+                const response = await ProfilesAPI.get('current/', {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                        Authorization: `Bearer ${accessToken}`,
                     },
                 });
                 const fetchedProfile = response.data;
@@ -40,7 +42,7 @@ const UpdateProfilePage = () => {
         };
 
         fetchProfile();
-    }, []);
+    }, [accessToken]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -54,16 +56,16 @@ const UpdateProfilePage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log('[UpdateProfilePage] Submitting updated profile data:', formData);
-    
+
         const data = new FormData();
         for (const key in formData) {
             data.append(key, formData[key]);
         }
-    
+
         try {
-            await axios.put(`http://localhost:8002/profiles/api/${profile.id}/`, data, {
+            await ProfilesAPI.put(`api/${profile.id}/`, data, {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                    'Authorization': `Bearer ${accessToken}`,
                     'Content-Type': 'multipart/form-data',
                 },
             });
@@ -74,7 +76,6 @@ const UpdateProfilePage = () => {
             navigate('/profile', { state: { errorMessage: 'Failed to update profile.' } });
         }
     };
-    
 
     if (loading) return <Spinner animation="border" variant="primary" />;
     if (error) return <p className="text-danger">{error}</p>;
