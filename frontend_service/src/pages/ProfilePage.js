@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
 import { Spinner, Button, Alert } from 'react-bootstrap';
+import { ProfilesAPI } from '../api';
 
 const ProfilePage = () => {
     const [profile, setProfile] = useState(null);
@@ -13,17 +13,10 @@ const ProfilePage = () => {
 
     useEffect(() => {
         const fetchProfile = async () => {
-            console.log('[ProfilePage] Fetching profile...');
             try {
-                const response = await axios.get('http://localhost:8002/profiles/current/', {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-                    },
-                });
-                console.log('[ProfilePage] Profile fetched:', response.data);
+                const response = await ProfilesAPI.get('current/');
                 setProfile(response.data);
             } catch (err) {
-                console.error('[ProfilePage] Error fetching profile:', err);
                 setError('Failed to load profile');
             } finally {
                 setLoading(false);
@@ -60,7 +53,7 @@ const ProfilePage = () => {
                         </p>
                         {profile.profile_picture && (
                             <img
-                                src={`http://localhost:8002${profile.profile_picture}`}
+                                src={profile.profile_picture}
                                 alt="Profile"
                                 className="img-fluid rounded-circle"
                                 style={{ maxWidth: '150px' }}
