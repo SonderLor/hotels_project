@@ -5,9 +5,9 @@ from profiles_service import settings
 from .views import CurrentUserProfileView, ProfileViewSet
 
 router = DefaultRouter()
-router.register(r'', ProfileViewSet, basename='profile')
+router.register('profiles', ProfileViewSet, basename='profile')
 
 urlpatterns = [
-    path('api/', include(router.urls)),
     path('current/', CurrentUserProfileView.as_view(), name='current_user_profile'),
+    path('', include(router.urls)),
 ]
