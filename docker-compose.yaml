@@ -148,6 +148,37 @@ services:
     networks:
       - app_network
 
+  bookings_db:
+    image: mysql:8.0
+    container_name: bookingsDB
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_BOOKINGS_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_BOOKINGS_NAME}
+      MYSQL_USER: ${DB_BOOKINGS_USER}
+      MYSQL_PASSWORD: ${DB_BOOKINGS_PASSWORD}
+    ports:
+      - "3313:3306"
+    volumes:
+      - bookings_db_data:/var/lib/mysql
+    networks:
+      - app_network
+
+  bookings_web:
+    build:
+      context: ./bookings_service/
+      dockerfile: Dockerfile
+    container_name: bookingsService
+    command: >
+      sh -c "python manage.py makemigrations && \
+      python manage.py migrate && \
+      python manage.py runserver --noreload 0.0.0.0:8000"
+    ports:
+      - "8004:8000"
+    depends_on:
+      - bookings_db
+    networks:
+      - app_network
+
   redis:
     image: redis:latest
     container_name: redisCache
@@ -172,6 +203,8 @@ volumes:
   profiles_db_data:
     driver: local
   hotels_db_data:
+    driver: local
+  bookings_db_data:
     driver: local
   profiles_media_volume:
   hotels_media_volume:
