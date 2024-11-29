@@ -26,6 +26,9 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'corsheaders',
+
+    'hotels.apps.HotelsConfig',
+    'rooms.apps.RoomsConfig',
 ]
 
 MIDDLEWARE = [
@@ -127,7 +130,31 @@ LOGGING = {
         },
     },
     'loggers': {
-
+        'hotels.views': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'hotels.serializers': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'rooms.views': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'middlewares': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'authentication': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     },
 }
 
@@ -143,7 +170,7 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = BASE_DIR / 'static'
 
-MEDIA_URL = '/media/'
+MEDIA_URL = '/api/hotels-rooms/media/'
 
 MEDIA_ROOT = BASE_DIR / 'media'
 
