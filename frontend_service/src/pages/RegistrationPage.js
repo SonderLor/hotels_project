@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { register } from '../api';
+import { AuthAPI } from '../api';
 
 const RegistrationPage = () => {
     const [formData, setFormData] = useState({
@@ -8,38 +8,34 @@ const RegistrationPage = () => {
         username: '',
         password: '',
         passwordRepeat: '',
+        role: 'active',
     });
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('[RegistrationPage] Form submitted with data:', formData);
 
         if (formData.password !== formData.passwordRepeat) {
-            console.warn('[RegistrationPage] Passwords do not match');
             setError('Passwords do not match.');
             return;
-        }
+        } 
 
         try {
-            console.log('[RegistrationPage] Sending registration request...');
-            await register({
+            await AuthAPI.post('users/', {
                 email: formData.email,
                 username: formData.username,
                 password: formData.password,
+                role: formData.role,
             });
-            console.log('[RegistrationPage] Registration successful');
             navigate('/login');
         } catch (err) {
-            console.error('[RegistrationPage] Registration error:', err);
             setError('Registration failed.');
         }
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        console.log(`[RegistrationPage] Updating field ${name}:`, value);
         setFormData({ ...formData, [name]: value });
     };
 
@@ -90,6 +86,18 @@ const RegistrationPage = () => {
                         onChange={handleChange}
                         required
                     />
+                </div>
+                <div className="mb-3">
+                    <label className="form-label">Role</label>
+                    <select
+                        name="role"
+                        className="form-select"
+                        value={formData.role}
+                        onChange={handleChange}
+                    >
+                        <option value="active">User</option>
+                        <option value="staff">Tenant</option>
+                    </select>
                 </div>
                 <button type="submit" className="btn btn-success">
                     Register
