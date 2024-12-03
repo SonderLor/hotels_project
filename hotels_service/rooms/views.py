@@ -1,9 +1,14 @@
 from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.parsers import MultiPartParser
 from rest_framework.views import APIView
+from rest_framework.filters import OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.generics import ListAPIView
 from .models import Room, RoomType, Image
 from .serializers import RoomSerializer, RoomTypeSerializer, ImageSerializer
+from .filters import RoomFilter
 from hotels_service.permissions import TokenAuthenticated, RoleStaff
 import logging
 
@@ -130,3 +135,50 @@ class RoomViewSet(ModelViewSet):
         response = super().destroy(request, *args, **kwargs)
         logger.info("Room deleted successfully for ID: %s", kwargs['pk'])
         return response
+
+
+class SearchRoomsAPIView(ListAPIView):
+    queryset = Room.objects.select_related('hotel')
+    serializer_class = RoomSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_class = RoomFilter
+    ordering_fields = ['price_per_night']
+    ordering = ['price_per_night']
+
+
+class SearchRoomsByIdsView(APIView):
+    permission_classes = [TokenAuthenticated]
+
+    def post(self, request):
+        room_ids = request.data.get('room_ids', [])
+        hotel = request.data.get('hotel')
+        country = request.data.get('country')
+        city = request.data.get('city')
+        room_type = request.data.get('type')
+        name = request.data.get('name')
+        price_min = request.data.get('price_min')
+        price_max = request.data.get('price_max')
+        sort = request.data.get('sort')
+
+        query = Room.objects.exclude(id__in=room_ids).select_related('hotel')
+
+        if hotel:
+            query = query.filter(hotel__name__icontains=hotel)
+        if country:
+            query = query.filter(hotel__country__icontains=country)
+        if city:
+            query = query.filter(hotel__city__icontains=city)
+        if room_type:
+            query = query.filter(type__name=room_type)
+        if name:
+            query = query.filter(name__icontains=name)
+        if price_min:
+            query = query.filter(price_per_night__gte=price_min)
+        if price_max:
+            query = query.filter(price_per_night__lte=price_max)
+
+        if sort:
+            query = query.order_by(sort)
+
+        serialized_rooms = RoomSerializer(query, many=True, context={'request': request}).data
+        return Response({"rooms": serialized_rooms}, status=status.HTTP_200_OK)

@@ -2,9 +2,15 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.parsers import MultiPartParser
 from rest_framework.views import APIView
+from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models.functions import Lower
+from rest_framework.generics import ListAPIView
 from .models import Hotel, HotelType, Image
 from .serializers import HotelSerializer, HotelTypeSerializer, ImageSerializer
 from hotels_service.permissions import TokenAuthenticated, RoleStaff
+from django.core.cache import cache
+import hashlib
+import json
 import logging
 
 logger = logging.getLogger(__name__)
@@ -134,7 +140,7 @@ class CurrentUserHotelsView(APIView):
         logger.info("Fetching hotels for user ID: %s", request.user_id)
         try:
             user_id = request.user_id
-            hotels = Hotel.objects.filter(owner_id=user_id)
+            hotels = Hotel.objects.filter(owner_id=user_id).prefetch_related('rooms')
             if not hotels.exists():
                 logger.warning("No hotels found for user ID: %s", user_id)
                 return Response({"error": "No hotels found"}, status=404)
@@ -144,3 +150,41 @@ class CurrentUserHotelsView(APIView):
         except Exception as e:
             logger.error("Error fetching hotels for user ID: %s, error: %s", user_id, str(e))
             return Response({"error": "Something went wrong"}, status=500)
+
+
+class SearchHotelsAPIView(ListAPIView):
+    queryset = Hotel.objects.all()
+    serializer_class = HotelSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = {
+        'type__name': ['exact'],
+        'rating': ['gte', 'lte'],
+    }
+
+    def get_queryset(self):
+        query_params = self.request.query_params.dict()
+        cache_key = f"hotels_search:{hashlib.md5(json.dumps(query_params, sort_keys=True).encode()).hexdigest()}"
+
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            return cached_data
+
+        queryset = Hotel.objects.annotate(
+            city_lower=Lower('city'),
+            country_lower=Lower('country'),
+            name_lower=Lower('name'),
+        )
+        city = self.request.query_params.get('city', None)
+        country = self.request.query_params.get('country', None)
+        name = self.request.query_params.get('name', None)
+
+        if city:
+            queryset = queryset.filter(city_lower__icontains=city.lower())
+        if country:
+            queryset = queryset.filter(country_lower__icontains=country.lower())
+        if name:
+            queryset = queryset.filter(name_lower__icontains=name.lower())
+    
+        cache.set(cache_key, queryset, timeout=60 * 60 * 5)
+
+        return queryset
