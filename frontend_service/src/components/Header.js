@@ -52,6 +52,24 @@ const Header = () => {
                                     </NavLink>
                                 </li>
                                 <li className="nav-item">
+                                    <NavLink
+                                        className="nav-link"
+                                        to="/search/hotels"
+                                        activeClassName="active"
+                                    >
+                                        Search Hotels
+                                    </NavLink>
+                                </li>
+                                <li className="nav-item">
+                                    <NavLink
+                                        className="nav-link"
+                                        to="/search/rooms"
+                                        activeClassName="active"
+                                    >
+                                        Search Rooms
+                                    </NavLink>
+                                </li>
+                                <li className="nav-item">
                                     <div class="btn-group" role="group" aria-label="Basic example">
                                         <NavLink
                                             className="btn btn-secondary"
