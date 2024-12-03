@@ -10,7 +10,6 @@ services:
     networks:
       - app_network
     
-
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     hostname: zookeeper
@@ -34,6 +33,18 @@ services:
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - app_network
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     networks:
       - app_network
 
@@ -148,6 +159,27 @@ services:
     networks:
       - app_network
 
+  hotels_web_kafka_listener:
+    build:
+      context: ./hotels_service/
+      dockerfile: Dockerfile
+    container_name: hotelsServiceKafkaListener
+    command: >
+      sh -c "python start_kafka_consumer.py"
+    ports:
+      - "8023:8000"
+    depends_on:
+      - hotels_db
+    networks:
+      - app_network
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+
   bookings_db:
     image: mysql:8.0
     container_name: bookingsDB
@@ -179,21 +211,15 @@ services:
     networks:
       - app_network
 
-  redis:
-    image: redis:latest
-    container_name: redisCache
-    ports:
-      - "6379:6379"
-    networks:
-      - app_network
-
-  react_frontend:
+  bookings_celery_worker:
     build:
-      context: ./frontend_service
+      context: ./bookings_service/
       dockerfile: Dockerfile
-    container_name: reactFrontend
-    ports:
-      - "3000:3000"
+    container_name: bookingsCeleryWorker
+    command: celery -A bookings_service worker --loglevel=info
+    depends_on:
+      - rabbitmq
+      - bookings_db
     networks:
       - app_network
 
