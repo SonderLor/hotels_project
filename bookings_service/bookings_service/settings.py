@@ -27,6 +27,10 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'corsheaders',
+    'django_celery_results',
+    'django_celery_beat',
+
+    'bookings.apps.BookingsConfig',
 ]
 
 MIDDLEWARE = [
@@ -128,9 +132,23 @@ LOGGING = {
         },
     },
     'loggers': {
-
+        'bookings.views': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     },
 }
+
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+
+CELERY_ACCEPT_CONTENT = ['json']
+
+CELERY_TASK_SERIALIZER = 'json'
+
+CELERY_RESULT_BACKEND = 'django-db'
+
+CELERY_CACHE_BACKEND = 'django-cache'
 
 LANGUAGE_CODE = 'en-us'
 
