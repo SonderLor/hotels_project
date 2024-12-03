@@ -63,7 +63,7 @@ const UpdateProfilePage = () => {
         }
 
         try {
-            await ProfilesAPI.put(`api/${profile.id}/`, data, {
+            await ProfilesAPI.put(`${profile.id}/`, data, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
                     'Content-Type': 'multipart/form-data',

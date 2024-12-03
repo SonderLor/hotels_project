@@ -72,7 +72,7 @@ const CreateHotelPage = () => {
                     imagesPayload.append('images', image);
                 });
     
-                await HotelsAPI.post(`/hotels-app/hotels/${hotel_id}/upload-images/`, imagesPayload, {
+                await HotelsAPI.post(`/hotels-app/${hotel_id}/upload-images/`, imagesPayload, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
             }

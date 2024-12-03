@@ -15,7 +15,7 @@ const HotelDetails = () => {
             try {
                 const response = await HotelsAPI.get(`/hotels-app/hotels/${hotel_id}/`);
                 setHotel(response.data);
-                const profileResponse = await ProfilesAPI.get(`profiles/${response.data.owner_id}/`);
+                const profileResponse = await ProfilesAPI.get(`${response.data.owner_id}/`);
                 setProfile(profileResponse.data);
             } catch (err) {
                 console.error('Failed to fetch data:', err);

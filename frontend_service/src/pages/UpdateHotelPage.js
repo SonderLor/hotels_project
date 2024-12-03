@@ -50,7 +50,7 @@ const UpdateHotelPage = () => {
 
     const handleDeleteImage = async (imageId) => {
         try {
-            await HotelsAPI.delete(`/hotels-app/hotels/${hotel_id}/delete-images/${imageId}/`);
+            await HotelsAPI.delete(`/hotels-app/${hotel_id}/delete-images/${imageId}/`);
             setExistingImages((prev) => prev.filter((img) => img.id !== imageId));
         } catch (error) {
             console.error('Failed to delete image:', error);
@@ -82,7 +82,7 @@ const UpdateHotelPage = () => {
                 imagesPayload.append('images', image);
             });
 
-            await HotelsAPI.post(`/hotels-app/hotels/${hotel_id}/upload-images/`, imagesPayload, {
+            await HotelsAPI.post(`/hotels-app/${hotel_id}/upload-images/`, imagesPayload, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
         }
