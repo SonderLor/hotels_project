@@ -19,6 +19,8 @@ import CreateHotelPage from './pages/CreateHotelPage';
 import UpdateHotelPage from './pages/UpdateHotelPage';
 import CreateRoomPage from './pages/CreateRoomPage';
 import UpdateRoomPage from './pages/UpdateRoomPage';
+import SearchHotelsPage from './pages/SearchHotelsPage';
+import SearchRoomsPage from './pages/SearchRoomsPage';
 
 function App() {
   return (
@@ -44,6 +46,8 @@ function App() {
               <Route path="/hotels/:hotel_id/update" element={<UpdateHotelPage />} />
               <Route path="/hotels/:hotel_id/rooms/create" element={<CreateRoomPage />} />
               <Route path="/hotels/:hotel_id/rooms/:room_id/update" element={<UpdateRoomPage />} />
+              <Route path="/search/hotels" element={<SearchHotelsPage />} />
+              <Route path="/search/rooms" element={<SearchRoomsPage />} />
             </Routes>
           </main>
           <Footer />
