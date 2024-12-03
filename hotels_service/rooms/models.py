@@ -25,6 +25,7 @@ class Room(models.Model):
     price_per_night = models.DecimalField(max_digits=10, decimal_places=2)
     is_available = models.BooleanField(default=True)
     preview_image = models.ImageField(upload_to=preview_image_upload_path, blank=True, null=True)
+    total_bookings = models.BigIntegerField()
 
     def __str__(self):
         return f"{self.hotel.name} - {self.name}"
