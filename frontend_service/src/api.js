@@ -50,6 +50,7 @@ const createAPI = (baseURL) => {
 export const AuthAPI = createAPI('http://localhost/api/auth/');
 export const ProfilesAPI = createAPI('http://localhost/api/profiles/');
 export const HotelsAPI = createAPI('http://localhost/api/hotels-rooms/');
+export const BookingsAPI = createAPI('http://localhost/api/bookings/');
 
 export const refreshAccessToken = async () => {
     const refreshToken = localStorage.getItem('refresh_token');
