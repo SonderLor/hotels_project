@@ -3,6 +3,12 @@ from .models import Room, RoomType, Image
 from hotels.models import Hotel
 
 
+class HotelLiteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Hotel
+        fields = ('id', 'name', 'city', 'country')
+
+
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
@@ -20,9 +26,9 @@ class RoomSerializer(serializers.ModelSerializer):
         queryset=RoomType.objects.all(),
         slug_field='name'
     )
-    hotel = serializers.PrimaryKeyRelatedField(queryset=Hotel.objects.all())
+    hotel = HotelLiteSerializer(read_only=True)
     images = ImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Room
-        fields = ('id', 'name', 'price_per_night', 'is_available', 'type', 'hotel', 'images', 'preview_image')
+        fields = ('id', 'name', 'price_per_night', 'is_available', 'type', 'hotel', 'images', 'preview_image', 'total_bookings')
