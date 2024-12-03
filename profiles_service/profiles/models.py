@@ -13,6 +13,7 @@ class Profile(models.Model):
     birth_date = models.DateField(blank=True, null=True)
     location = models.CharField(max_length=100, blank=True, null=True)
     profile_picture = models.ImageField(upload_to=profile_picture_upload_path, blank=True, null=True)
+    total_bookings = models.BigIntegerField()
 
     def __str__(self):
         return f"Profile for User ID {self.user_id}"
