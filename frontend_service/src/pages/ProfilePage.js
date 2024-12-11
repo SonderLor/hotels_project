@@ -57,34 +57,35 @@ const ProfilePage = () => {
                     const roomIds = userHotelsData.flatMap(hotel => 
                         hotel.rooms.map(room => room.id)
                     );
+                    if (roomIds.length != 0) {
+                        const userBookingsResponse = await BookingsAPI.post('/get-by-room-id/', {
+                            room_ids: roomIds
+                        });
+            
+                        const userBookingsData = userBookingsResponse.data;
+            
+                        const updatedUserBookings = await Promise.all(
+                            userBookingsData.map(async (booking) => {
+                                const userResponse = await ProfilesAPI.get(`/${booking.user_id}/`);
+                                const userData = userResponse.data;
     
-                    const userBookingsResponse = await BookingsAPI.post('/get-by-room-id/', {
-                        room_ids: roomIds
-                    });
+                                const roomResponse = await HotelsAPI.get(`/rooms-app/rooms/${booking.room_id}/`);
+                                const roomData = roomResponse.data;
+            
+                                const hotelResponse = await HotelsAPI.get(`/hotels-app/hotels/${roomData.hotel.id}/`);
+                                const hotelData = hotelResponse.data;
         
-                    const userBookingsData = userBookingsResponse.data;
+                                return {
+                                    ...booking,
+                                    user: userData,
+                                    room: roomData,
+                                    hotel: hotelData
+                                };
+                            })
+                        );
         
-                    const updatedUserBookings = await Promise.all(
-                        userBookingsData.map(async (booking) => {
-                            const userResponse = await ProfilesAPI.get(`/${booking.user_id}/`);
-                            const userData = userResponse.data;
-
-                            const roomResponse = await HotelsAPI.get(`/rooms-app/rooms/${booking.room_id}/`);
-                            const roomData = roomResponse.data;
-        
-                            const hotelResponse = await HotelsAPI.get(`/hotels-app/hotels/${roomData.hotel.id}/`);
-                            const hotelData = hotelResponse.data;
-    
-                            return {
-                                ...booking,
-                                user: userData,
-                                room: roomData,
-                                hotel: hotelData
-                            };
-                        })
-                    );
-    
-                    setUserBookings(updatedUserBookings);
+                        setUserBookings(updatedUserBookings);
+                    }                
                 }
             } catch (err) {
                 setError('Failed to load profile or bookings');

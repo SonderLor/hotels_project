@@ -93,11 +93,6 @@ class RoomTypeViewSet(ModelViewSet):
 class RoomViewSet(ModelViewSet):
     queryset = Room.objects.select_related('hotel')
     serializer_class = RoomSerializer
-
-    def get_permissions(self):
-        if self.action in ['create', 'update', 'destroy']:
-            return [TokenAuthenticated(), RoleStaff()]
-        return [TokenAuthenticated()]
     
     def get_permissions(self):
         if self.action == 'create' or self.action == 'update' or self.action == 'destroy':
